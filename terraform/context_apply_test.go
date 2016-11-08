@@ -3628,8 +3628,10 @@ func TestContext2Apply_destroyModuleWithAttrsReferencingResource(t *testing.T) {
 		})
 
 		// First plan and apply a create operation
-		if _, err := ctx.Plan(); err != nil {
+		if p, err := ctx.Plan(); err != nil {
 			t.Fatalf("plan err: %s", err)
+		} else {
+			t.Logf("Step 1 plan: %s", p)
 		}
 
 		state, err = ctx.Apply()
@@ -3663,6 +3665,8 @@ func TestContext2Apply_destroyModuleWithAttrsReferencingResource(t *testing.T) {
 			t.Fatalf("destroy plan err: %s", err)
 		}
 
+		t.Logf("Step 2 plan: %s", plan)
+
 		var buf bytes.Buffer
 		if err := WritePlan(plan, &buf); err != nil {
 			t.Fatalf("plan write err: %s", err)
@@ -3686,6 +3690,8 @@ func TestContext2Apply_destroyModuleWithAttrsReferencingResource(t *testing.T) {
 		if err != nil {
 			t.Fatalf("destroy apply err: %s", err)
 		}
+
+		t.Logf("Step 2 state: %s", state)
 	}
 
 	//Test that things were destroyed
@@ -3696,7 +3702,7 @@ module.child:
   <no state>
 		`)
 	if actual != expected {
-		t.Fatalf("expected: \n%s\n\nbad: \n%s", expected, actual)
+		t.Fatalf("expected:\n\n%s\n\nactual:\n\n%s", expected, actual)
 	}
 }
 

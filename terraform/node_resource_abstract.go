@@ -1,6 +1,8 @@
 package terraform
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform/config"
 	"github.com/hashicorp/terraform/dag"
 )
@@ -47,7 +49,30 @@ func (n *NodeAbstractResource) ReferenceableName() []string {
 		return nil
 	}
 
-	return []string{n.Config.Id()}
+	var result []string
+	id := n.Config.Id()
+
+	// Always include our own ID. This is primarily for backwards
+	// compatibility with states that didn't yet support the more
+	// specific dep string.
+	result = append(result, id)
+
+	// We represent all multi-access
+	result = append(result, fmt.Sprintf("%s.*", id))
+
+	// We represent either a specific number, or all numbers
+	suffix := "N"
+	if n.Addr != nil {
+		idx := n.Addr.Index
+		if idx == -1 {
+			idx = 0
+		}
+
+		suffix = fmt.Sprintf("%d", idx)
+	}
+	result = append(result, fmt.Sprintf("%s.%s", id, suffix))
+
+	return result
 }
 
 // GraphNodeReferencer

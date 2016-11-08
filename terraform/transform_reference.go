@@ -244,8 +244,23 @@ func ReferenceFromInterpolatedVar(v config.InterpolatedVariable) []string {
 	case *config.ModuleVariable:
 		return []string{fmt.Sprintf("module.%s.output.%s", v.Name, v.Field)}
 	case *config.ResourceVariable:
-		result := []string{v.ResourceId()}
-		return result
+		id := v.ResourceId()
+
+		// If we have a multi-reference (splat), then we depend on ALL
+		// resources with this type/name.
+		if v.Multi && v.Index == -1 {
+			return []string{fmt.Sprintf("%s.*", id)}
+		}
+
+		// Otherwise, we depend on a specific index.
+		idx := v.Index
+		if !v.Multi || v.Index == -1 {
+			idx = 0
+		}
+
+		// Depend on the index, as well as "N" which represents the
+		// un-expanded set of resources.
+		return []string{fmt.Sprintf("%s.%d/%s.N", id, idx, id)}
 	case *config.UserVariable:
 		return []string{fmt.Sprintf("var.%s", v.Name)}
 	default:
