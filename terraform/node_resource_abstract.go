@@ -45,12 +45,21 @@ func (n *NodeAbstractResource) Path() []string {
 
 // GraphNodeReferenceable
 func (n *NodeAbstractResource) ReferenceableName() []string {
-	if n.Config == nil {
+	// We always are referenceable as "type.name" as long as
+	// we have a config or address. Determine what that value is.
+	var id string
+	if n.Config != nil {
+		id = n.Config.Id()
+	} else if n.Addr != nil {
+		addrCopy := n.Addr.Copy()
+		addrCopy.Index = -1
+		id = addrCopy.String()
+	} else {
+		// No way to determine our type.name, just return
 		return nil
 	}
 
 	var result []string
-	id := n.Config.Id()
 
 	// Always include our own ID. This is primarily for backwards
 	// compatibility with states that didn't yet support the more

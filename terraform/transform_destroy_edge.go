@@ -158,6 +158,9 @@ func (t *DestroyEdgeTransformer) Transform(g *Graph) error {
 	for _, v := range tempG.Vertices() {
 		// Find all the references
 		refs, _ := refMap.References(v)
+		log.Printf(
+			"[TRACE] DestroyEdgeTransformer: creation node %q references %v",
+			dag.VertexName(v), refs)
 
 		// If we have no references, then we won't need to do anything
 		if len(refs) == 0 {

@@ -3419,6 +3419,8 @@ func TestContext2Apply_destroyOrder(t *testing.T) {
 		t.Fatalf("err: %s", err)
 	}
 
+	t.Logf("State 1: %s", state)
+
 	// Next, plan and apply config-less to force a destroy with "apply"
 	h.Active = true
 	ctx = testContext2(t, &ContextOpts{
